@@ -79,9 +79,9 @@ class NodeInstaller implements InstallerInterface
      */
     public function isInstalled()
     {
-        $nodeExecutable = $this->context->getBinDir() . DIRECTORY_SEPARATOR . 'node';
-
-        $process = new Process("$nodeExecutable --version");
+        $process = new Process(["node --version"], $this->context->getBinDir());
+        $process->setIdleTimeout(null);
+        $process->setTimeout(null);
         $process->run();
 
         if ($process->isSuccessful()) {
@@ -192,14 +192,12 @@ class NodeInstaller implements InstallerInterface
      */
     private function untar($source, $targetDir)
     {
-        $process = new Process(
-            "tar -xvf ".$source." -C ".escapeshellarg($targetDir)." --strip 1"
-        );
+        $process = new Process(["tar -xvf " . $source . " -C ".escapeshellarg($targetDir) . " --strip 1"]);
         $process->run();
 
         if (!$process->isSuccessful()) {
             throw new \RuntimeException(sprintf(
-                'An error occurred while untaring NodeJS (%s) to %s',
+                'An error occurred while untaring NodeJS (%s) to %s: ' . "tar -xvf " . $source . " -C ".escapeshellarg($targetDir) . " --strip 1",
                 $source,
                 $targetDir
             ));
